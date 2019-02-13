@@ -3,9 +3,9 @@ from flask import jsonify, make_response, request, current_app as app
 
 def response(data=None, code=0, message='Success', user_message='Success'):
     """ response 返回格式
-    :param code: returnCode 类型 int，`0` 表示成功，非 `0` 表示失败
-    :param user_message: returnUserMessage 类型 string
-    :param message: returnMessage 类型 string
+    :param code: 错误码，类型 int，`0` 表示成功，非 `0` 表示失败
+    :param user_message: 用户错误信息 类型 string
+    :param message: 系统错误信息 类型 string
     :param data: 参数主体 类型 dict
     :return: 返回响应 body
     """
@@ -25,11 +25,11 @@ def response(data=None, code=0, message='Success', user_message='Success'):
 
     response_body = {
         'error': {
-            'returnCode': code,
-            'returnMessage': message,
-            'returnUserMessage': user_message
+            'code': code,
+            'message': message,
+            'user_message': user_message
         },
         'data': data
     }
-    app.logger.info(f'response: {response_body}')
+    app.logger.info(f'{response_body}')
     return make_response((jsonify(response_body), 200, headers))

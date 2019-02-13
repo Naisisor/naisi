@@ -12,7 +12,9 @@ def create_app(config_name):
     config[config_name].init_app(app)
     db.init_app(app)
 
-    from .api import api
-    app.register_blueprint(api)
+    from .api import create_blueprint
+    app.register_blueprint(create_blueprint())
+    from .error import bp_error
+    app.register_blueprint(bp_error)
 
     return app
