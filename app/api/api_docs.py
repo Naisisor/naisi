@@ -1,7 +1,8 @@
-from app.libs.api_doc_blueprint import APIDocBlueprint
+from flask import Blueprint
+
 from app.response import response
 
-api = APIDocBlueprint('api-docs')
+api = Blueprint('api-docs', __name__)
 
 
 @api.route('/api-docs/<int:id>')

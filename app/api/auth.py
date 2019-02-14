@@ -1,7 +1,8 @@
-from app.libs.api_doc_blueprint import APIDocBlueprint
+from flask import Blueprint
+
 from app.response import response
 
-api = APIDocBlueprint('auth')
+api = Blueprint('auth', __name__)
 
 
 @api.route('/register')

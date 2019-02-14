@@ -3,8 +3,8 @@ import os
 from flask_migrate import Migrate
 
 from app import create_app, db
-from app.models import Role, User, Project, System, URI, APIDoc, Protocol, \
-    Method, SystemCollect, URICollect, ProjectCollect
+from app.models import Role, User, Project, System, URL, APIDoc, Protocol, \
+    Method, SystemCollect, URLCollect, ProjectCollect
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
@@ -19,11 +19,11 @@ def make_shell_context():
         User=User,
         Project=Project,
         System=System,
-        URI=URI,
+        URL=URL,
         APIDoc=APIDoc,
         Protocol=Protocol,
         Method=Method,
         ProjectCollect=ProjectCollect,
         SystemCollect=SystemCollect,
-        URICollect=URICollect
+        URLCollect=URLCollect
     )

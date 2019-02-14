@@ -1,3 +1,3 @@
-from app.libs.api_doc_blueprint import APIDocBlueprint
+from flask import Blueprint
 
-api = APIDocBlueprint('systems')
+api = Blueprint('systems', __name__)

@@ -1,3 +1,3 @@
-from app.libs.api_doc_blueprint import APIDocBlueprint
+from flask import Blueprint
 
-api = APIDocBlueprint('protocols')
+api = Blueprint('protocols', __name__)

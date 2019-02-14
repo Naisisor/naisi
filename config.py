@@ -13,8 +13,10 @@ class Config:
     DATABASE_USER = os.environ.get('DATABASE_USER')
     DATABASE_PWD = os.environ.get('DATABASE_PWD')
     API_DOC_MAIL_SUBJECT_PREFIX = '[接口文档]'
-    API_DOC_MAIL_SENDER = f'APIDocs <{os.environ.get("MAIL_USERNAME")}>'
+    API_DOC_MAIL_SENDER = f'APIDocs <{MAIL_USERNAME}>'
     API_DOC_ADMIN = os.environ.get('FLASKY_ADMIN')
+    API_DOC_PER_PAGE = 20
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_COMMIT_TEARDOWN = True
 
     @staticmethod
@@ -25,18 +27,15 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_ECHO = True
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://root:{os.environ.get("DB_PWD")}@localhost/api_doc?charset=utf8'
 
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://root:{os.environ.get("DB_PWD")}@localhost/api_doc?charset=utf8'
 
 
 class ProductionConfig(Config):
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://root:{os.environ.get("DB_PWD")}@localhost/api_doc?charset=utf8'
 
 

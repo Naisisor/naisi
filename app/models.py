@@ -17,8 +17,8 @@ class ProjectCollect(db.Model):
     collected_id = db.Column(db.Integer, db.ForeignKey('projects.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-    collector = db.relationship('User', back_populates='project_collections', lazy='joined')
-    collected = db.relationship('Project', back_populates='project_collectors', lazy='joined')
+    user = db.relationship('User', back_populates='project_collections', lazy='joined')
+    project = db.relationship('Project', back_populates='project_collectors', lazy='joined')
 
 
 class SystemCollect(db.Model):
@@ -28,19 +28,19 @@ class SystemCollect(db.Model):
     collected_id = db.Column(db.Integer, db.ForeignKey('systems.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-    collector = db.relationship('User', back_populates='system_collections', lazy='joined')
-    collected = db.relationship('System', back_populates='system_collectors', lazy='joined')
+    user = db.relationship('User', back_populates='system_collections', lazy='joined')
+    system = db.relationship('System', back_populates='system_collectors', lazy='joined')
 
 
-class URICollect(db.Model):
-    """ 用户关注的 uri 的关系表 """
-    __tablename__ = 'uri_collect'
+class URLCollect(db.Model):
+    """ 用户关注的 url 的关系表 """
+    __tablename__ = 'url_collect'
     collector_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    collected_id = db.Column(db.Integer, db.ForeignKey('uri.id'), primary_key=True)
+    collected_id = db.Column(db.Integer, db.ForeignKey('urls.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-    collector = db.relationship('User', back_populates='uri_collections', lazy='joined')
-    collected = db.relationship('URI', back_populates='uri_collectors', lazy='joined')
+    user = db.relationship('User', back_populates='url_collections', lazy='joined')
+    url = db.relationship('URL', back_populates='url_collectors', lazy='joined')
 
 
 class User(db.Model):
@@ -52,13 +52,13 @@ class User(db.Model):
     username = db.Column(db.String(64), unique=True, index=True)
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
 
-    projects = db.relationship('Project', back_populates='creator')
-    systems = db.relationship('System', back_populates='creator')
-    uri = db.relationship('URI', back_populates='creator')
+    projects = db.relationship('Project', back_populates='creator', lazy='dynamic')
+    systems = db.relationship('System', back_populates='creator', lazy='dynamic')
+    urls = db.relationship('URL', back_populates='creator', lazy='dynamic')
     api_docs = db.relationship('APIDoc', back_populates='editor')
-    project_collections = db.relationship('ProjectCollect', back_populates='collector', cascade='all,delete-orphan')
-    system_collections = db.relationship('SystemCollect', back_populates='collector', cascade='all, delete-orphan')
-    uri_collections = db.relationship('URICollect', back_populates='collector', cascade='all, delete-orphan')
+    project_collections = db.relationship('ProjectCollect', back_populates='user', cascade='all,delete-orphan')
+    system_collections = db.relationship('SystemCollect', back_populates='user', cascade='all, delete-orphan')
+    url_collections = db.relationship('URLCollect', back_populates='user', cascade='all, delete-orphan')
 
     def to_json(self):
         json_user = {
@@ -82,7 +82,7 @@ class Project(db.Model):
 
     creator = db.relationship('User', back_populates='projects')
     systems = db.relationship('System', back_populates='project', cascade='all')
-    project_collectors = db.relationship('ProjectCollect', back_populates='collected', cascade='all, delete-orphan')
+    project_collectors = db.relationship('ProjectCollect', back_populates='project', cascade='all, delete-orphan')
 
     def to_json(self):
         json_project = {
@@ -109,8 +109,8 @@ class System(db.Model):
 
     creator = db.relationship('User', back_populates='systems')
     project = db.relationship('Project', back_populates='systems')
-    uri = db.relationship('URI', back_populates='system', cascade='all')
-    system_collectors = db.relationship('SystemCollect', back_populates='collected', cascade='all, delete-orphan')
+    urls = db.relationship('URL', back_populates='system', cascade='all')
+    system_collectors = db.relationship('SystemCollect', back_populates='system', cascade='all, delete-orphan')
 
     def to_json(self):
         json_system = {
@@ -130,7 +130,7 @@ class Protocol(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), comment='协议名称')
 
-    uri = db.relationship('URI', back_populates='protocol', cascade='all')
+    urls = db.relationship('URL', back_populates='protocol', cascade='all')
     methods = db.relationship('Method', back_populates='protocol')
 
     def to_json(self):
@@ -159,33 +159,33 @@ class Method(db.Model):
         return json_method
 
 
-class URI(db.Model):
+class URL(db.Model):
     """ 接口列表 """
-    __tablename__ = 'uri'
+    __tablename__ = 'urls'
     id = db.Column(db.Integer, primary_key=True)
-    uri = db.Column(db.String(128), unique=True, index=True)
+    path = db.Column(db.String(128), index=True)
     desc = db.Column(db.String(128))
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
     protocol_id = db.Column(db.Integer, db.ForeignKey('protocols.id'))
     system_id = db.Column(db.Integer, db.ForeignKey('systems.id'))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    creator = db.relationship('User', back_populates='uri')
-    protocol = db.relationship('Protocol', back_populates='uri')
-    system = db.relationship('System', back_populates='uri')
-    api_docs = db.relationship('APIDoc', back_populates='uri', cascade='all')
-    uri_collectors = db.relationship('URICollect', back_populates='collected', cascade='all, delete-orphan')
+    creator = db.relationship('User', back_populates='urls')
+    protocol = db.relationship('Protocol', back_populates='urls')
+    system = db.relationship('System', back_populates='urls')
+    api_docs = db.relationship('APIDoc', back_populates='url', cascade='all')
+    url_collectors = db.relationship('URLCollect', back_populates='url', cascade='all, delete-orphan')
 
     def to_json(self):
-        json_uri = {
+        json_url = {
             'id': self.id,
-            'name': self.name or '',
-            'desc': self.desc,
+            'path': self.path,
+            'desc': self.desc or '',
             'hosts': self.hosts,
             'create_time': str(self.c_time),
             'creator': self.creator.name
         }
-        return json_uri
+        return json_url
 
 
 class APIDoc(db.Model):
@@ -195,20 +195,20 @@ class APIDoc(db.Model):
     response_param = db.Column(db.Text, comment='响应参数')
     response_body = db.Column(db.Text, comment='响应体 json 字符串')
     edit_time = db.Column(db.DateTime, default=datetime.utcnow)
-    uri_id = db.Column(db.Integer, db.ForeignKey('uri.id'))
+    url_id = db.Column(db.Integer, db.ForeignKey('urls.id'))
     method_id = db.Column(db.Integer, db.ForeignKey('methods.id'))
     editor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     editor = db.relationship('User', back_populates='api_docs')
-    uri = db.relationship('URI', back_populates='api_docs')
+    url = db.relationship('URL', back_populates='api_docs')
     method = db.relationship('Method', back_populates='api_docs')
 
     def to_json(self):
         json_api_doc = {
             'id': self.id,
-            'name': self.name or '',
-            'desc': self.desc,
-            'hosts': self.hosts,
+            'request_param': self.request_param,
+            'response_param': self.response_param,
+            'response_body': self.response_body,
             'edit_time': str(self.edit_time),
             'editor': self.editor.name
         }
