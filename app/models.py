@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from flask import url_for
+
 from . import db
 
 
@@ -52,9 +54,9 @@ class User(db.Model):
     username = db.Column(db.String(64), unique=True, index=True)
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
 
-    projects = db.relationship('Project', back_populates='creator', lazy='dynamic')
-    systems = db.relationship('System', back_populates='creator', lazy='dynamic')
-    urls = db.relationship('URL', back_populates='creator', lazy='dynamic')
+    projects = db.relationship('Project', back_populates='supporter', lazy='dynamic')
+    systems = db.relationship('System', back_populates='supporter', lazy='dynamic')
+    urls = db.relationship('URL', back_populates='supporter', lazy='dynamic')
     api_docs = db.relationship('APIDoc', back_populates='editor')
     project_collections = db.relationship('ProjectCollect', back_populates='user', cascade='all,delete-orphan')
     system_collections = db.relationship('SystemCollect', back_populates='user', cascade='all, delete-orphan')
@@ -65,7 +67,10 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'name': self.name,
-            'username': self.username
+            'username': self.username,
+            'projects_url': url_for(endpoint='users.get_user_support_projects', id=self.id, _external=True),
+            'systems_url': url_for(endpoint='users.get_user_support_systems', id=self.id, _external=True),
+            'urls_url': url_for(endpoint='users.get_user_support_urls', id=self.id, _external=True)
         }
         return json_user
 
@@ -78,9 +83,9 @@ class Project(db.Model):
     desc = db.Column(db.String(128), default='')
     hosts = db.Column(db.Text)
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    supporter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    creator = db.relationship('User', back_populates='projects')
+    supporter = db.relationship('User', back_populates='projects')
     systems = db.relationship('System', back_populates='project', cascade='all')
     project_collectors = db.relationship('ProjectCollect', back_populates='project', cascade='all, delete-orphan')
 
@@ -91,7 +96,17 @@ class Project(db.Model):
             'desc': self.desc,
             'hosts': self.hosts,
             'create_time': str(self.c_time),
-            'creator': self.creator.name
+            'supporter': {
+                'id': self.supporter.id,
+                'email': self.supporter.email,
+                'name': self.supporter.name,
+                'username': self.supporter.username,
+                'url': url_for(endpoint='users.get_user', id=self.supporter.id, _external=True),
+                'projects_url': url_for(endpoint='users.get_user_support_projects', id=self.supporter.id,
+                                        _external=True),
+                'systems_url': url_for(endpoint='users.get_user_support_systems', id=self.supporter.id, _external=True),
+                'urls_url': url_for(endpoint='users.get_user_support_urls', id=self.supporter.id, _external=True)
+            }
         }
         return json_project
 
@@ -104,12 +119,12 @@ class System(db.Model):
     desc = db.Column(db.String(128))
     hosts = db.Column(db.Text, comment="json 串，包含 dev、test、stage、online 环境")
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    supporter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
 
-    creator = db.relationship('User', back_populates='systems')
+    supporter = db.relationship('User', back_populates='systems')
     project = db.relationship('Project', back_populates='systems')
-    urls = db.relationship('URL', back_populates='system', cascade='all')
+    urls = db.relationship('URL', back_populates='system', cascade='all', lazy='dynamic')
     system_collectors = db.relationship('SystemCollect', back_populates='system', cascade='all, delete-orphan')
 
     def to_json(self):
@@ -119,7 +134,17 @@ class System(db.Model):
             'desc': self.desc,
             'hosts': self.hosts,
             'create_time': str(self.c_time),
-            'creator': self.creator.name
+            'supporter': {
+                'id': self.supporter.id,
+                'email': self.supporter.email,
+                'name': self.supporter.name,
+                'username': self.supporter.username,
+                'url': url_for(endpoint='users.get_user', id=self.supporter.id, _external=True),
+                'projects_url': url_for(endpoint='users.get_user_support_projects', id=self.supporter.id,
+                                        _external=True),
+                'systems_url': url_for(endpoint='users.get_user_support_systems', id=self.supporter.id, _external=True),
+                'urls_url': url_for(endpoint='users.get_user_support_urls', id=self.supporter.id, _external=True)
+            }
         }
         return json_system
 
@@ -168,9 +193,9 @@ class URL(db.Model):
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
     protocol_id = db.Column(db.Integer, db.ForeignKey('protocols.id'))
     system_id = db.Column(db.Integer, db.ForeignKey('systems.id'))
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    supporter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    creator = db.relationship('User', back_populates='urls')
+    supporter = db.relationship('User', back_populates='urls')
     protocol = db.relationship('Protocol', back_populates='urls')
     system = db.relationship('System', back_populates='urls')
     api_docs = db.relationship('APIDoc', back_populates='url', cascade='all')
@@ -181,9 +206,18 @@ class URL(db.Model):
             'id': self.id,
             'path': self.path,
             'desc': self.desc or '',
-            'hosts': self.hosts,
             'create_time': str(self.c_time),
-            'creator': self.creator.name
+            'supporter': {
+                'id': self.supporter.id,
+                'email': self.supporter.email,
+                'name': self.supporter.name,
+                'username': self.supporter.username,
+                'url': url_for(endpoint='users.get_user', id=self.supporter.id, _external=True),
+                'projects_url': url_for(endpoint='users.get_user_support_projects', id=self.supporter.id,
+                                        _external=True),
+                'systems_url': url_for(endpoint='users.get_user_support_systems', id=self.supporter.id, _external=True),
+                'urls_url': url_for(endpoint='users.get_user_support_urls', id=self.supporter.id, _external=True)
+            }
         }
         return json_url
 
@@ -210,7 +244,16 @@ class APIDoc(db.Model):
             'response_param': self.response_param,
             'response_body': self.response_body,
             'edit_time': str(self.edit_time),
-            'editor': self.editor.name
+            'editor': {
+                'id': self.editor.id,
+                'email': self.editor.email,
+                'name': self.editor.name,
+                'username': self.editor.username,
+                'url': url_for(endpoint='users.get_user', id=self.editor.id, _external=True),
+                'projects_url': url_for(endpoint='users.get_user_support_projects', id=self.editor.id, _external=True),
+                'systems_url': url_for(endpoint='users.get_user_support_systems', id=self.editor.id, _external=True),
+                'urls_url': url_for(endpoint='users.get_user_support_urls', id=self.editor.id, _external=True)
+            }
         }
         return json_api_doc
 

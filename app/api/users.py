@@ -8,6 +8,7 @@ api = Blueprint('users', __name__)
 
 @api.route('/<int:id>', methods=['GET'])
 def get_user(id):
+    """ 获取用户信息 """
     user = User.query.get(id)
     if not user:
         return response(code=1, user_message='此用户不存在')
@@ -15,7 +16,7 @@ def get_user(id):
 
 
 @api.route('/<int:id>/projects', methods=['GET'])
-def get_user_created_projects(id):
+def get_user_support_projects(id):
     """ 获取用户所创建的项目 """
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
@@ -34,7 +35,7 @@ def get_user_created_projects(id):
 
 
 @api.route('/<int:id>/systems', methods=['GET'])
-def get_user_created_systems(id):
+def get_user_support_systems(id):
     """ 获取用户所创建的系统 """
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
@@ -45,7 +46,7 @@ def get_user_created_systems(id):
     paginate = user.systems.paginate(
         page, per_page, error_out=False)
     data = {
-        'projects': [s.to_json() for s in paginate.items],
+        'systems': [s.to_json() for s in paginate.items],
         'count': paginate.total,
         'paginate': paginate.page
     }
@@ -53,7 +54,7 @@ def get_user_created_systems(id):
 
 
 @api.route('/<int:id>/urls', methods=['GET'])
-def get_user_created_urls(id):
+def get_user_support_urls(id):
     """ 获取用户所创建的 uri """
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
@@ -64,7 +65,7 @@ def get_user_created_urls(id):
     paginate = user.urls.paginate(
         page, per_page, error_out=False)
     data = {
-        'projects': [u.to_json() for u in paginate.items],
+        'urls': [u.to_json() for u in paginate.items],
         'count': paginate.total,
         'paginate': paginate.page
     }
@@ -124,7 +125,7 @@ def get_user_collection_urls(id):
         URLCollect.timestamp.desc()).paginate(
         page, per_page, error_out=False)
     data = {
-        'systems': [c.systems.to_json() for c in paginate.items],
+        'urls': [c.systems.to_json() for c in paginate.items],
         'count': paginate.total,
         'paginate': paginate.page
     }
