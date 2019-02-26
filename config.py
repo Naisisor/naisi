@@ -17,7 +17,7 @@ class Config:
     API_DOC_ADMIN = os.environ.get('FLASKY_ADMIN')
     API_DOC_PER_PAGE = 20
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_COMMIT_TEARDOWN = True
+    SQLALCHEMY_COMMIT_TEARDOWN = False
 
     @staticmethod
     def init_app(app):

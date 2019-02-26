@@ -15,7 +15,7 @@ def get_user(id):
     return response(data={'user': user.to_json()})
 
 
-@api.route('/<int:id>/projects', methods=['GET'])
+@api.route('/<int:id>/projects/', methods=['GET'])
 def get_user_support_projects(id):
     """ 获取用户所创建的项目 """
     user = User.query.get_or_404(id)
@@ -34,7 +34,7 @@ def get_user_support_projects(id):
     return response(data=data)
 
 
-@api.route('/<int:id>/systems', methods=['GET'])
+@api.route('/<int:id>/systems/', methods=['GET'])
 def get_user_support_systems(id):
     """ 获取用户所创建的系统 """
     user = User.query.get_or_404(id)
@@ -53,7 +53,7 @@ def get_user_support_systems(id):
     return response(data=data)
 
 
-@api.route('/<int:id>/urls', methods=['GET'])
+@api.route('/<int:id>/urls/', methods=['GET'])
 def get_user_support_urls(id):
     """ 获取用户所创建的 uri """
     user = User.query.get_or_404(id)
@@ -72,7 +72,7 @@ def get_user_support_urls(id):
     return response(data=data)
 
 
-@api.route('/<int:id>/collection-projects', methods=['GET'])
+@api.route('/<int:id>/collection-projects/', methods=['GET'])
 def get_user_collection_projects(id):
     """ 获取用户收藏的项目 """
     user = User.query.get_or_404(id)
@@ -92,7 +92,7 @@ def get_user_collection_projects(id):
     return response(data=data)
 
 
-@api.route('/<int:id>/collection-systems', methods=['GET'])
+@api.route('/<int:id>/collection-systems/', methods=['GET'])
 def get_user_collection_systems(id):
     """ 获取用户收藏的系统 """
     user = User.query.get_or_404(id)
@@ -112,7 +112,7 @@ def get_user_collection_systems(id):
     return response(data=data)
 
 
-@api.route('/<int:id>/collection-urls', methods=['GET'])
+@api.route('/<int:id>/collection-urls/', methods=['GET'])
 def get_user_collection_urls(id):
     """ 获取用户收藏的 URL """
     user = User.query.get_or_404(id)

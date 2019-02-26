@@ -81,7 +81,7 @@ class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
     desc = db.Column(db.String(128), default='')
-    hosts = db.Column(db.Text)
+    domain = db.Column(db.Text)
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
     supporter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -94,7 +94,7 @@ class Project(db.Model):
             'id': self.id,
             'name': self.name or '',
             'desc': self.desc,
-            'hosts': self.hosts,
+            'domain': self.domain,
             'create_time': str(self.c_time),
             'supporter': {
                 'id': self.supporter.id,
@@ -117,7 +117,7 @@ class System(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
     desc = db.Column(db.String(128))
-    hosts = db.Column(db.Text, comment="json 串，包含 dev、test、stage、online 环境")
+    domain = db.Column(db.Text, comment="json 串，包含 dev、test、stage、online 环境")
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
     supporter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
@@ -132,7 +132,7 @@ class System(db.Model):
             'id': self.id,
             'name': self.name or '',
             'desc': self.desc,
-            'hosts': self.hosts,
+            'domain': self.domain,
             'create_time': str(self.c_time),
             'supporter': {
                 'id': self.supporter.id,
@@ -153,10 +153,10 @@ class Protocol(db.Model):
     """ 协议 """
     __tablename__ = 'protocols'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(32), comment='协议名称')
+    name = db.Column(db.String(32), unique=True, comment='协议名称')
 
     urls = db.relationship('URL', back_populates='protocol', cascade='all')
-    methods = db.relationship('Method', back_populates='protocol')
+    methods = db.relationship('Method', back_populates='protocol', lazy='dynamic')
 
     def to_json(self):
         json_protocol = {
