@@ -31,13 +31,13 @@ def delete_method(id):
 def new_method():
     """ 新建方法 """
     params = request.json
-    name = params.json('name', '')
-    protocol_id = params.json('protocol_id', 0)
+    name = params.get('name', '')
+    protocol_id = params.get('protocol_id', 0)
     if not (name and protocol_id) or is_contain_zh(name):
         return response(code=1, user_message='参数错误，且方法名不能包含中文')
     protocol = Protocol.query.get_or_404(protocol_id)
     cap_name = name.upper()
-    existed_method = protocol.methods.filter(Method.name == cap_name).frist()
+    existed_method = protocol.methods.filter(Method.name == cap_name).first()
     if existed_method:
         return response(code=1, user_message=f'请求方式 {cap_name} 已存在请勿重复添加')
     method = Method(name=cap_name, protocol_id=protocol_id)
@@ -51,13 +51,13 @@ def edit_method(id):
     """ 编辑方法 """
     method = Method.query.get_or_404(id)
     params = request.json
-    name = params.json('name', '')
-    protocol_id = params.json('protocol_id', 0)
+    name = params.get('name', '')
+    protocol_id = params.get('protocol_id', 0)
     if not (name and protocol_id) or is_contain_zh(name):
         return response(code=1, user_message='参数错误，且方法名不能包含中文')
     protocol = Protocol.query.get_or_404(protocol_id)
     cap_name = name.upper()
-    existed_method = protocol.methods.filter(Method.name == cap_name).frist()
+    existed_method = protocol.methods.filter(Method.name == cap_name).first()
     if existed_method and existed_method.id != method.id:
         return response(code=1, user_message=f'请求方式 {cap_name} 已存在请勿重复添加')
     method.name = cap_name

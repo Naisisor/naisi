@@ -119,6 +119,7 @@ class User(db.Model):
             'email': self.email,
             'name': self.name,
             'username': self.username,
+            'avatar': '',
             'projects_url': url_for(
                 endpoint='users.get_user_support_projects',
                 id=self.id,
@@ -131,6 +132,14 @@ class User(db.Model):
                 endpoint='users.get_user_support_urls',
                 id=self.id,
                 _external=True)}
+        return json_user
+
+    def summary_to_json(self):
+        json_user = {
+            'name': self.name,
+            'avatar': '',
+            'profile': url_for('users.get_user', id=self.id, _external=True)
+        }
         return json_user
 
 
@@ -162,7 +171,7 @@ class Project(db.Model):
             'desc': self.desc,
             'domain': self.domain,
             'create_time': str(self.c_time),
-            'supporter': self.supporter.to_json()
+            'supporter': self.supporter.summary_to_json()
         }
         return json_project
 
@@ -196,9 +205,8 @@ class System(db.Model):
             'name': self.name or '',
             'desc': self.desc,
             'domain': self.domain,
-            'create_time': str(
-                self.c_time),
-            'supporter': self.supporter.to_json()
+            'create_time': str(self.c_time),
+            'supporter': self.supporter.summary_to_json()
         }
         return json_system
 
@@ -219,7 +227,7 @@ class Protocol(db.Model):
         json_protocol = {
             'id': self.id,
             'name': self.name,
-            'methods': [method.to_json() for method in self.protocol.methods]
+            'methods': [method.to_json() for method in self.methods]
         }
         return json_protocol
 
@@ -260,7 +268,7 @@ class URL(db.Model):
     supporter = db.relationship('User', back_populates='urls')
     protocol = db.relationship('Protocol', back_populates='urls')
     system = db.relationship('System', back_populates='urls')
-    api_docs = db.relationship('APIDoc', back_populates='url', cascade='all')
+    api_docs = db.relationship('APIDoc', back_populates='url', lazy='dynamic', cascade='all')
     url_collectors = db.relationship(
         'URLCollect',
         back_populates='url',
@@ -273,16 +281,17 @@ class URL(db.Model):
             'desc': self.desc or '',
             'create_time': str(self.c_time),
             'protocol': self.protocol.to_json(),
-            'supporter': self.supporter.to_json()}
+            'supporter': self.supporter.summary_to_json()
+        }
         return json_url
 
 
 class APIDoc(db.Model):
     __tablename__ = 'api_docs'
     id = db.Column(db.Integer, primary_key=True)
-    request_param = db.Column(db.Text, comment='请求参数')
-    response_param = db.Column(db.Text, comment='响应参数')
-    response_body = db.Column(db.Text, comment='响应体 json 字符串')
+    request_params = db.Column(db.Text, comment='请求参数')
+    resp_params = db.Column(db.Text, comment='响应参数')
+    resp_body = db.Column(db.Text, comment='响应体 json 字符串')
     edit_time = db.Column(db.DateTime, default=datetime.utcnow)
     url_id = db.Column(db.Integer, db.ForeignKey('urls.id'))
     method_id = db.Column(db.Integer, db.ForeignKey('methods.id'))
@@ -299,13 +308,8 @@ class APIDoc(db.Model):
             'response_param': self.response_param,
             'response_body': self.response_body,
             'edit_time': str(self.edit_time),
-            'editor': self.editor.to_json(),
-            'url': {
-                'id': self.url.id,
-                'path': self.url.path,
-                'desc': self.url.desc,
-                'create_time': str(self.url.c_time)
-            }
+            'editor': self.editor.summary_to_json(),
+            'url_details': url_for('urls.get_url', id=self.url_id, _external=True)
         }
         if self.method is not None:
             json_api_doc['method'] = self.method.to_json()

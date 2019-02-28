@@ -11,8 +11,8 @@ api = Blueprint('protocols', __name__)
 @api.route('/<int:id>', methods=['GET'])
 def get_protocol(id):
     """ 获取协议 """
-    project = Protocol.query.get_or_404(id)
-    return response(data={'protocol': project.to_json()})
+    protocol = Protocol.query.get_or_404(id)
+    return response(data={'protocol': protocol.to_json()})
 
 
 @api.route('/<int:id>', methods=['DELETE'])

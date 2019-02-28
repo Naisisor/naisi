@@ -1,7 +1,7 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app
 
 from app import db
-from app.models import Project, User
+from app.models import Project, User, System
 from app.response import response
 
 api = Blueprint('projects', __name__)
@@ -62,3 +62,22 @@ def edit_project(id):
     db.session.add(project)
     db.session.commit()
     return response()
+
+
+@api.route('/<int:id>/systems/', methods=['GET'])
+def get_project_systems(id):
+    """ 获取项目下的项目集 """
+    project = Project.query.get_or_404(id)
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get(
+        'per_page',
+        current_app.config['API_DOC_PER_PAGE'],
+        type=int)
+    paginate = project.systems.order_by(System.id.desc()).paginate(
+        page, per_page, error_out=False)
+    data = {
+        'systems': [s.to_json() for s in paginate.items],
+        'count': paginate.total,
+        'paginate': paginate.page
+    }
+    return response(data=data)

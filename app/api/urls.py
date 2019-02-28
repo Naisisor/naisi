@@ -81,3 +81,11 @@ def edit_url(id):
     db.session.add(url)
     db.session.commit()
     return response()
+
+
+@api.route('/<int:id>/docs/', methods=['GET'])
+def get_url_docs(id):
+    """ 获取项目下的项目集 """
+    url = URL.query.get_or_404(id)
+    docs = url.api_docs.all()
+    return response(data={'docs': [doc.to_json() for doc in docs]})

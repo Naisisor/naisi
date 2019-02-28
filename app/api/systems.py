@@ -69,3 +69,11 @@ def edit_system(id):
     db.session.add(system)
     db.session.commit()
     return response()
+
+
+@api.route('/<int:id>/urls/', methods=['GET'])
+def get_system_urls(id):
+    """ 获取项目下的项目集 """
+    system = System.query.get_or_404(id)
+    urls = system.urls.all()
+    return response(data={'urls': [u.to_json() for u in urls]})
