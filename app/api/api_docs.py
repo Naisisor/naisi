@@ -29,13 +29,13 @@ def new_api_doc():
     method_id = params.get('method_id', 0)
     editor_id = params.get('editor_id', 0)
     if not (url_id and method_id and editor_id):
-        return response(code=1, user_message='参数缺失')
+        return response(code=1, message='参数缺失')
     editor = User.query.get_or_404(editor_id)
     method = Method.query.get_or_404(method_id)
     url = URL.query.get_or_404(url_id)
     existed_doc = url.api_docs.filter(APIDoc.method_id == method_id).frist()
     if existed_doc:
-        return response(code=1, user_message=f'{url.path} 接口中已存在 {method.name} 请求，请勿重复添加')
+        return response(code=1, message=f'{url.path} 接口中已存在 {method.name} 请求，请勿重复添加')
     doc = APIDoc(
         request_params=params.get('request_params', '{}'),
         resp_params=params.get('resp_params', '{}'),
@@ -56,7 +56,7 @@ def edit_api_doc(id):
     params = request.json
     editor_id = params.get('editor_id', 0)
     if not editor_id:
-        return response(code=1, user_message='用户字段缺失')
+        return response(code=1, message='用户字段缺失')
     editor = User.query.get_or_404(editor_id)
     doc.request_params = params.get('request_params', '{}')
     doc.resp_params = params.get('resp_params', '{}')

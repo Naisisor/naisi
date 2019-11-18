@@ -11,7 +11,7 @@ def get_user(id):
     """ 获取用户信息 """
     user = User.query.get(id)
     if not user:
-        return response(code=1, user_message='此用户不存在')
+        return response(code=1, message='此用户不存在')
     return response(data={'user': user.to_json()})
 
 

@@ -1,16 +1,15 @@
 from flask import jsonify, make_response, request, current_app as app
 
 
-def response(data=None, code=0, message='Success', user_message='Success'):
+def response(data=None, code=0, message='Success'):
     """ response 返回格式
     :param code: 错误码，类型 int，`0` 表示成功，非 `0` 表示失败
-    :param user_message: 用户错误信息 类型 string
-    :param message: 系统错误信息 类型 string
+    :param message: 用户错误信息 类型 string
     :param data: 参数主体 类型 dict
     :return: 返回响应 body
     """
-    if code != 0 and message == 'Success':
-        message = user_message
+    if code != 0 and 'Success' == message:
+        message = 'Failed'
 
     if data is None:
         data = {}
@@ -24,11 +23,8 @@ def response(data=None, code=0, message='Success', user_message='Success'):
     }
 
     response_body = {
-        'error': {
-            'code': code,
-            'message': message,
-            'user_message': user_message
-        },
+        'code': code,
+        'message': message,
         'data': data
     }
     app.logger.info(f'{response_body}')

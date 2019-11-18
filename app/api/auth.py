@@ -26,7 +26,7 @@ def verify_password(email_or_token, password):
 
 @auth.error_handler
 def auth_error():
-    return response(code=1, user_message='Invalid credentials')
+    return response(code=1, message='Invalid credentials')
 
 
 @api.before_request
@@ -34,13 +34,13 @@ def auth_error():
 def before_request():
     if not g.current_user.is_anonymous and \
             not g.current_user.confirmed:
-        return response(code=1, user_message='Unconfirmed account')
+        return response(code=1, message='Unconfirmed account')
 
 
 @api.route('/tokens/', methods=['POST'])
 def get_token():
     if g.current_user.is_anonymous or g.token_used:
-        return response(code=1, user_message='Invalid credentials')
+        return response(code=1, message='Invalid credentials')
     return jsonify({'token': g.current_user.generate_auth_token(
         expiration=3600), 'expiration': 3600})
 

@@ -28,11 +28,11 @@ def new_protocol():
     params = request.json
     name = params.get('name', '')
     if not name or is_contain_zh(name):
-        return response(code=1, user_message='协议名不能为空且不能包含中文')
+        return response(code=1, message='协议名不能为空且不能包含中文')
     cap_name = name.upper()
     existed_protocol = Protocol.query.filter_by(name=cap_name).first()
     if existed_protocol:
-        return response(code=1, user_message='协议名已存在，请勿重复添加')
+        return response(code=1, message='协议名已存在，请勿重复添加')
     protocol = Protocol(name=cap_name)
     db.session.add(protocol)
     db.session.commit()
@@ -46,11 +46,11 @@ def edit_protocol(id):
     params = request.json
     name = params.get('name', '')
     if not name or is_contain_zh(name):
-        return response(code=1, user_message='协议名不能为空且不能包含中文')
+        return response(code=1, message='协议名不能为空且不能包含中文')
     cap_name = name.upper()
     existed_protocol = Protocol.query.filter_by(name=cap_name).first()
     if existed_protocol and existed_protocol.id != protocol.id:
-        return response(code=1, user_message='协议名已存在，请勿重复添加')
+        return response(code=1, message='协议名已存在，请勿重复添加')
     protocol.name = cap_name
     db.session.add(protocol)
     db.session.commit()

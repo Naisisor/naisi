@@ -30,12 +30,12 @@ def new_system():
     supporter_id = params.get('supporter_id', 0)
     project_id = params.get('project_id', 0)
     if not (name and supporter_id and project_id):
-        return response(code=1, user_message='参数不能为空')
+        return response(code=1, message='参数不能为空')
     supporter = User.query.get_or_404(supporter_id)
     project = Project.query.get_or_404(project_id)
     existed_system = project.systems.filter(System.name == name).first()
     if existed_system:
-        return response(code=1, user_message=f'系统 {name} 已存在，请勿重复添加')
+        return response(code=1, message=f'系统 {name} 已存在，请勿重复添加')
     system = System(name=name,
                     desc=params.get('desc', ''),
                     domain=params.get('domain', ''),
@@ -55,12 +55,12 @@ def edit_system(id):
     supporter_id = params.get('supporter_id', 0)
     project_id = params.get('project_id', 0)
     if not (name and supporter_id and project_id):
-        return response(code=1, user_message='参数不能为空')
+        return response(code=1, message='参数不能为空')
     supporter = User.query.get_or_404(supporter_id)
     project = Project.query.get_or_404(project_id)
     existed_system = project.systems.filter(System.name == name).first()
     if existed_system and existed_system.id != system.id:
-        return response(code=1, user_message=f'系统 {name} 已存在，请勿重复添加')
+        return response(code=1, message=f'系统 {name} 已存在，请勿重复添加')
     system.name = name
     system.desc = params.get('desc', ''),
     system.domain = params.get('domain', '')

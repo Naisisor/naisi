@@ -171,7 +171,7 @@ class Project(db.Model):
             'desc': self.desc,
             'domain': self.domain,
             'create_time': str(self.c_time),
-            'supporter': self.supporter.summary_to_json()
+            'supporter': self.supporter.to_json()
         }
         return json_project
 

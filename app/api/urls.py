@@ -32,7 +32,7 @@ def new_url():
     system_id = params.get('system_id', 0)
     supporter_id = params.get('supporter_id', 0)
     if not (params and protocol_id and system_id and supporter_id) and is_contain_zh(path):
-        return response(code=1, user_message='参数错误，且接口中不能包含中文')
+        return response(code=1, message='参数错误，且接口中不能包含中文')
     protocol = Protocol.query.get_or_404(protocol_id)
     system = System.query.get_or_404(system_id)
     supporter = User.query.get_or_404(supporter_id)
@@ -40,7 +40,7 @@ def new_url():
     # 判断 path 是否存在
     exited_url = system.urls.filter(URL.path == path).first()
     if exited_url:
-        return response(code=1, user_message=f'{path} 已存在，请勿重复添加')
+        return response(code=1, message=f'{path} 已存在，请勿重复添加')
 
     url = URL(
         path=path,
@@ -63,7 +63,7 @@ def edit_url(id):
     system_id = params.get('system_id', 0)
     supporter_id = params.get('supporter_id', 0)
     if not (params and protocol_id and system_id and supporter_id) and is_contain_zh(path):
-        return response(code=1, user_message='参数错误，且接口中不能包含中文')
+        return response(code=1, message='参数错误，且接口中不能包含中文')
     protocol = Protocol.query.get_or_404(protocol_id)
     system = System.query.get_or_404(system_id)
     supporter = User.query.get_or_404(supporter_id)
@@ -71,7 +71,7 @@ def edit_url(id):
     # 判断 path 是否存在
     existed_url = system.urls.filter(URL.path == path).first()
     if existed_url and existed_url.id != url.id:
-        return response(code=1, user_message=f'{path} 已存在，请勿重复添加')
+        return response(code=1, message=f'{path} 已存在，请勿重复添加')
 
     url.path = path
     url.desc = params.get('desc'),
