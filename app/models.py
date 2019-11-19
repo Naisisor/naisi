@@ -168,7 +168,7 @@ class Project(db.Model):
         json_project = {
             'id': self.id,
             'name': self.name or '',
-            'desc': self.desc,
+            'desc': self.desc or self.name,
             'domain': self.domain,
             'create_time': str(self.c_time),
             'supporter': self.supporter.to_json()
@@ -203,7 +203,7 @@ class System(db.Model):
         json_system = {
             'id': self.id,
             'name': self.name or '',
-            'desc': self.desc,
+            'desc': self.desc or self.name,
             'domain': self.domain,
             'create_time': str(self.c_time),
             'supporter': self.supporter.summary_to_json()

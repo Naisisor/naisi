@@ -43,7 +43,7 @@ def new_system():
                     supporter_id=supporter.id)
     db.session.add(system)
     db.session.commit()
-    return response()
+    return response(data={'system': system.to_json()})
 
 
 @api.route('/<int:id>', methods=['PUT'])

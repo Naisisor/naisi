@@ -39,7 +39,7 @@ def new_project():
     """ 新建项目 """
     params = request.json
     name = params.get('name', None)
-    desc = params.get('desc', '') if params.get('desc', '') else name
+    desc = params.get('desc', '')
     supporter_id = params.get('supporter_id', 0)
     if not (name and supporter_id):
         return response(code=1, message='参数错误')
