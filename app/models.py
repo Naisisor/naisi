@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from flask import url_for
@@ -149,7 +150,7 @@ class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
     desc = db.Column(db.String(128), default='')
-    domain = db.Column(db.Text)
+    domains = db.Column(db.Text)
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
     supporter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -169,7 +170,7 @@ class Project(db.Model):
             'id': self.id,
             'name': self.name or '',
             'desc': self.desc or self.name,
-            'domain': self.domain,
+            'domains': json.loads(self.domains or '[]'),
             'create_time': str(self.c_time),
             'supporter': self.supporter.to_json()
         }
@@ -182,7 +183,7 @@ class System(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
     desc = db.Column(db.String(128))
-    domain = db.Column(db.Text, comment="json 串，包含 dev、test、stage、online 环境")
+    domains = db.Column(db.Text, comment="列表 json 串，包含 dev、test、stage、online 环境")
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
     supporter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -204,7 +205,7 @@ class System(db.Model):
             'id': self.id,
             'name': self.name or '',
             'desc': self.desc or self.name,
-            'domain': self.domain,
+            'domains': json.loads(self.domains or '[]'),
             'create_time': str(self.c_time),
             'supporter': self.supporter.summary_to_json()
         }

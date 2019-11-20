@@ -38,7 +38,7 @@ def new_system():
         return response(code=1, message=f'系统 {name} 已存在，请勿重复添加')
     system = System(name=name,
                     desc=params.get('desc', ''),
-                    domain=params.get('domain', ''),
+                    domains=params.get('domains', '[]'),
                     project_id=project.id,
                     supporter_id=supporter.id)
     db.session.add(system)
@@ -63,7 +63,7 @@ def edit_system(id):
         return response(code=1, message=f'系统 {name} 已存在，请勿重复添加')
     system.name = name
     system.desc = params.get('desc', ''),
-    system.domain = params.get('domain', '')
+    system.domains = params.get('domains', '[]')
     system.project_id = project.id
     system.supporter_id = supporter.id
     db.session.add(system)

@@ -49,7 +49,7 @@ def new_project():
     supporter = User.query.get_or_404(supporter_id)
     project = Project(name=name,
                       desc=desc,
-                      domain=params.get('domain', '{}'),
+                      domains=params.get('domains', '[]'),
                       supporter_id=supporter.id)
     db.session.add(project)
     db.session.commit()
@@ -71,7 +71,7 @@ def edit_project(id):
     supporter = User.query.get_or_404(supporter_id)
     project.name = name
     project.desc = params.get('desc', '')
-    project.domain = params.get('domain', '')
+    project.domains = params.get('domains', '[]')
     project.supporter_id = supporter.id
     db.session.add(project)
     db.session.commit()
