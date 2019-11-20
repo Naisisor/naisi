@@ -75,7 +75,7 @@ def edit_project(id):
     project.supporter_id = supporter.id
     db.session.add(project)
     db.session.commit()
-    return response()
+    return response(data={'project': project.to_json()})
 
 
 @api.route('/<int:id>/systems/', methods=['GET'])
