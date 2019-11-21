@@ -1,4 +1,4 @@
-from app.api import errors, auth, users, projects, systems, urls, api_docs, protocols, methods
+from app.api import errors, auth, users, projects, systems, urls, api_docs, protocols, methods, v1
 
 
 def register_blueprint(app):
@@ -11,3 +11,4 @@ def register_blueprint(app):
     app.register_blueprint(api_docs.api, url_prefix='/api/docs')
     app.register_blueprint(protocols.api, url_prefix='/api/protocols')
     app.register_blueprint(methods.api, url_prefix='/api/methods')
+    app.register_blueprint(v1.api_v1, url_prefix='/api/v1')

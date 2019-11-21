@@ -11,6 +11,7 @@ pymysql = "*"
 flask-migrate = "*"
 python-dotenv = "*"
 flask-httpauth = "*"
+flask-cors = "*"
 
 [dev-packages]
 
