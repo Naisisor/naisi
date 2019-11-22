@@ -57,6 +57,7 @@ class SystemAPI(MethodView):
         """ 删除系统 """
         # TODO 增加权限控制，当系统下存在 apis 接口文档则不允许删除
         System.query.filter_by(id=sys_id).delete(synchronize_session=False)
+        db.session.commit()
         return response()
 
     def put(self, sys_id):
