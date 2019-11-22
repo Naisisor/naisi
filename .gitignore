@@ -105,6 +105,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 .vscode/
+logs/*
+!logs/.gitkeep
 migrations
 .idea
 Pipfile.lock

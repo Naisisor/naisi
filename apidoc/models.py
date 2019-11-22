@@ -135,14 +135,6 @@ class User(db.Model):
                 _external=True)}
         return json_user
 
-    def summary_to_json(self):
-        json_user = {
-            'name': self.name,
-            'avatar': '',
-            'profile': url_for('api_v1.users', id=self.id, _external=True)
-        }
-        return json_user
-
 
 class Project(db.Model):
     """ 项目列表 """
@@ -207,7 +199,7 @@ class System(db.Model):
             'desc': self.desc or self.name,
             'domains': json.loads(self.domains or '[]'),
             'create_time': str(self.c_time),
-            'supporter': self.supporter.summary_to_json()
+            'supporter': self.supporter.to_json()
         }
         return json_system
 
@@ -282,7 +274,7 @@ class URL(db.Model):
             'desc': self.desc or '',
             'create_time': str(self.c_time),
             'protocol': self.protocol.to_json(),
-            'supporter': self.supporter.summary_to_json()
+            'supporter': self.supporter.to_json()
         }
         return json_url
 
@@ -309,7 +301,7 @@ class APIDoc(db.Model):
             'response_param': self.response_param,
             'response_body': self.response_body,
             'edit_time': str(self.edit_time),
-            'editor': self.editor.summary_to_json(),
+            'editor': self.editor.to_json(),
             'url_details': url_for('api_v1.urls', url_id=self.url_id, _external=True)
         }
         if self.method is not None:
