@@ -1,8 +1,10 @@
 import logging
 import os
 from logging.handlers import RotatingFileHandler, SMTPHandler
+from pathlib import Path
 
 from flask import Flask, request
+from flask_sqlalchemy import get_debug_queries
 
 from apidoc.apis.v1 import api_v1
 from apidoc.decorators import logger_error
@@ -12,7 +14,7 @@ from apidoc.models import Role, User, Project, System, URL, APIDoc, Protocol, Me
 from apidoc.response import response
 from apidoc.settings import config
 
-basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+basedir = Path(__file__).absolute().parent.parent
 
 
 def create_app(config_name=None):
@@ -26,10 +28,16 @@ def create_app(config_name=None):
     register_blueprint(app)
     register_errorhandlers(app)
     register_shell_context(app)
+    register_request_handlers(app)
     return app
 
 
 def register_logging(app):
+    log_path = basedir / 'logs'
+
+    if log_path.is_dir() is False:
+        log_path.mkdir()
+
     class RequestFormatter(logging.Formatter):
 
         def format(self, record):
@@ -43,8 +51,7 @@ def register_logging(app):
     )
 
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    file_handler = RotatingFileHandler(os.path.join(basedir, 'logs/bluelog.log'),
+    file_handler = RotatingFileHandler(log_path / 'api-doc.log',
                                        maxBytes=10 * 1024 * 1024, backupCount=10)
     file_handler.setFormatter(formatter)
     file_handler.setLevel(logging.INFO)
@@ -119,3 +126,15 @@ def register_shell_context(app):
             SystemCollect=SystemCollect,
             URLCollect=URLCollect
         )
+
+
+def register_request_handlers(app):
+    @app.after_request
+    def query_profiler(response):
+        for q in get_debug_queries():
+            if q.duration >= app.config['APIDOC_SLOW_QUERY_THRESHOLD']:
+                app.logger.warning(
+                    'Slow query: Duration: %fs\n Context: %s\nQuery: %s\n '
+                    % (q.duration, q.context, q.statement)
+                )
+        return response

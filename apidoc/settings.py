@@ -1,6 +1,7 @@
 import os
+from pathlib import Path
 
-basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+basedir = Path(__file__).absolute().parent.parent
 
 
 class Config:
@@ -16,6 +17,7 @@ class Config:
     API_DOC_MAIL_SENDER = f'APIDocs <{MAIL_USERNAME}>'
     API_DOC_ADMIN = os.environ.get('FLASKY_ADMIN')
     API_DOC_PER_PAGE = 20
+    APIDOC_SLOW_QUERY_THRESHOLD = 1
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_COMMIT_TEARDOWN = False
 
