@@ -1,8 +1,8 @@
 from flask import Blueprint, g, jsonify
 from flask_httpauth import HTTPBasicAuth
 
-from app.models import User
-from app.response import response
+from apidoc.models import User
+from apidoc.response import response
 
 api = Blueprint('auth', __name__)
 auth = HTTPBasicAuth()

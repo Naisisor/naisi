@@ -1,8 +1,8 @@
 from flask.views import MethodView
 
-from app.api.v1 import api_v1
-from app.models import URL
-from app.response import response
+from apidoc.apis.v1 import api_v1
+from apidoc.models import URL
+from apidoc.response import response
 
 
 class DocsAPI(MethodView):

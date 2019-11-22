@@ -1,10 +1,10 @@
 from flask import request, current_app
 from flask.views import MethodView
 
-from app import db
-from app.api.v1 import api_v1
-from app.models import System, Project, User
-from app.response import response
+from apidoc.extensions import db
+from apidoc.apis.v1 import api_v1
+from apidoc.models import System, Project, User
+from apidoc.response import response
 
 
 class SystemsAPI(MethodView):
@@ -55,7 +55,7 @@ class SystemAPI(MethodView):
 
     def delete(self, sys_id):
         """ 删除系统 """
-        # TODO 增加权限控制，当系统下存在 api 接口文档则不允许删除
+        # TODO 增加权限控制，当系统下存在 apis 接口文档则不允许删除
         System.query.filter_by(id=sys_id).delete(synchronize_session=False)
         return response()
 

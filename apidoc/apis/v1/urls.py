@@ -1,11 +1,11 @@
 from flask import request
 from flask.views import MethodView
 
-from app import db
-from app.api.v1 import api_v1
-from app.libs.common import is_contain_zh
-from app.models import URL, System, User, Protocol
-from app.response import response
+from apidoc.extensions import db
+from apidoc.apis.v1 import api_v1
+from apidoc.libs.common import is_contain_zh
+from apidoc.models import URL, System, User, Protocol
+from apidoc.response import response
 
 
 class URLsAPI(MethodView):

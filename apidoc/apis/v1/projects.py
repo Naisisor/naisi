@@ -1,10 +1,10 @@
 from flask import request
 from flask.views import MethodView
 
-from app import db
-from app.api.v1 import api_v1
-from app.models import Project, User
-from app.response import response
+from apidoc.extensions import db
+from apidoc.apis.v1 import api_v1
+from apidoc.models import Project, User
+from apidoc.response import response
 
 
 class ProjectsAPI(MethodView):

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask import url_for
 
-from . import db
+from apidoc.extensions import db
 
 
 class Role(db.Model):
@@ -122,16 +122,16 @@ class User(db.Model):
             'username': self.username,
             'avatar': '',
             'projects_url': url_for(
-                endpoint='users.get_user_support_projects',
-                id=self.id,
+                endpoint='api_v1.support-projects',
+                user_id=self.id,
                 _external=True),
             'systems_url': url_for(
-                endpoint='users.get_user_support_systems',
-                id=self.id,
+                endpoint='api_v1.support-systems',
+                user_id=self.id,
                 _external=True),
             'urls_url': url_for(
-                endpoint='users.get_user_support_urls',
-                id=self.id,
+                endpoint='api_v1.support-urls',
+                user_id=self.id,
                 _external=True)}
         return json_user
 
@@ -139,7 +139,7 @@ class User(db.Model):
         json_user = {
             'name': self.name,
             'avatar': '',
-            'profile': url_for('users.get_user', id=self.id, _external=True)
+            'profile': url_for('api_v1.users', id=self.id, _external=True)
         }
         return json_user
 
@@ -310,7 +310,7 @@ class APIDoc(db.Model):
             'response_body': self.response_body,
             'edit_time': str(self.edit_time),
             'editor': self.editor.summary_to_json(),
-            'url_details': url_for('urls.get_url', id=self.url_id, _external=True)
+            'url_details': url_for('api_v1.urls', url_id=self.url_id, _external=True)
         }
         if self.method is not None:
             json_api_doc['method'] = self.method.to_json()

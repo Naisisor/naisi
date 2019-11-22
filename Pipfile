@@ -12,6 +12,7 @@ flask-migrate = "*"
 python-dotenv = "*"
 flask-httpauth = "*"
 flask-cors = "*"
+flask-login = "*"
 
 [dev-packages]
 pylint = "*"
