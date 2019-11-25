@@ -1,14 +1,44 @@
-from flask import Blueprint, current_app, request
+from flask import current_app, request, jsonify
 from flask.views import MethodView
 
 from apidoc.apis.v1 import api_v1
+from apidoc.apis.v1.auth import generate_token
+from apidoc.apis.v1.errors import api_abort
 from apidoc.models import User, ProjectCollect, URLCollect, SystemCollect
 from apidoc.response import response
 
-api = Blueprint('users', __name__)
+
+class AuthTokenAPI(MethodView):
+
+    def post(self):
+        grant_type = request.form.get('grant_type')
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if grant_type is None or grant_type.lower() != 'password':
+            return api_abort(code=400, message='The grant type must be password.')
+
+        user = User.query.filter_by(username=username).first()
+        if user is None or not user.validate_password(password):
+            return api_abort(code=400, message='Either the username or password was invalid.')
+
+        token, expiration = generate_token(user)
+        headers = {
+            'Cache-Control': 'no-store',
+            'Pragma': 'no-cache'
+        }
+
+        data = {
+            'access_token': token,
+            'token_type': 'Bearer',
+            'expires_in': expiration
+        }
+
+        return response(data=data, headers=headers)
 
 
 class UsersAPI(MethodView):
+
     def get(self):
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get(
@@ -29,6 +59,7 @@ class UsersAPI(MethodView):
 
 
 class UserAPI(MethodView):
+
     def get(self, user_id):
         """ 获取用户信息 """
         user = User.query.get_or_404(user_id)
@@ -41,6 +72,7 @@ class UserAPI(MethodView):
 
 
 class UserSupportProjects(MethodView):
+
     def get(self, user_id):
         """ 获取用户所创建的项目 """
         user = User.query.get_or_404(user_id)
@@ -60,6 +92,7 @@ class UserSupportProjects(MethodView):
 
 
 class UserSupportSystems(MethodView):
+
     def get(self, user_id):
         """ 获取用户所创建的系统 """
         user = User.query.get_or_404(user_id)
@@ -79,6 +112,7 @@ class UserSupportSystems(MethodView):
 
 
 class UserSupportURLs(MethodView):
+
     def get(self, user_id):
         """ 获取用户所创建的 uri """
         user = User.query.get_or_404(user_id)
@@ -98,6 +132,7 @@ class UserSupportURLs(MethodView):
 
 
 class UserCollectionProjects(MethodView):
+
     def get(self, user_id):
         """ 获取用户收藏的项目 """
         user = User.query.get_or_404(user_id)
@@ -118,6 +153,7 @@ class UserCollectionProjects(MethodView):
 
 
 class UserCollectionSystems(MethodView):
+
     def get(self, user_id):
         """ 获取用户收藏的系统 """
         user = User.query.get_or_404(user_id)
@@ -138,6 +174,7 @@ class UserCollectionSystems(MethodView):
 
 
 class UserCollectionURLs(MethodView):
+
     def get(self, user_id):
         """ 获取用户收藏的 URL """
         user = User.query.get_or_404(user_id)
@@ -157,22 +194,19 @@ class UserCollectionURLs(MethodView):
         return response(data=data)
 
 
-api_v1.add_url_rule('/users', view_func=UsersAPI.as_view('users'),
-                    methods=['GET', 'POST'])
-api_v1.add_url_rule('/users/<int:user_id>', view_func=UserAPI.as_view('user'),
-                    methods=['GET'])
-api_v1.add_url_rule('/users/<int:user_id>/projects', view_func=UserSupportProjects.as_view('support-projects'),
+api_v1.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), methods=['POST'])
+api_v1.add_url_rule('/users', view_func=UsersAPI.as_view('users'), methods=['GET', 'POST'])
+api_v1.add_url_rule('/users/<int:user_id>', view_func=UserAPI.as_view('user'), methods=['GET'])
+api_v1.add_url_rule('/users/<int:user_id>/projects',
+                    view_func=UserSupportProjects.as_view('support-projects'),
                     methods=['GET'])
 api_v1.add_url_rule('/users/<int:user_id>/systems', view_func=UserSupportSystems.as_view('support-systems'),
                     methods=['GET'])
-api_v1.add_url_rule('/users/<int:user_id>/urls', view_func=UserSupportURLs.as_view('support-urls'),
-                    methods=['GET'])
+api_v1.add_url_rule('/users/<int:user_id>/urls', view_func=UserSupportURLs.as_view('support-urls'), methods=['GET'])
 api_v1.add_url_rule('/users/<int:user_id>/collection-projects',
-                    view_func=UserSupportURLs.as_view('collection-projects'),
-                    methods=['GET'])
+                    view_func=UserSupportURLs.as_view('collection-projects'), methods=['GET'])
 api_v1.add_url_rule('/users/<int:user_id>/collection-systems',
-                    view_func=UserSupportURLs.as_view('collection-systems'),
-                    methods=['GET'])
+                    view_func=UserSupportURLs.as_view('collection-systems'), methods=['GET'])
 api_v1.add_url_rule('/users/<int:user_id>/collection-urls',
                     view_func=UserSupportURLs.as_view('collection-urls'),
                     methods=['GET'])

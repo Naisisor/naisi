@@ -6,6 +6,7 @@ from apidoc.response import response
 
 
 class DocsAPI(MethodView):
+
     def get(self, url_id):
         """ 获取项目下的项目集 """
         url = URL.query.get_or_404(url_id)
@@ -14,7 +15,7 @@ class DocsAPI(MethodView):
 
     def post(self, url_id):
         """ 新建接口 """
-        url = URL.query.get_or_404(url_id)
+        URL.query.get_or_404(url_id)
         return response()
 
 

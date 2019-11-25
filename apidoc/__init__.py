@@ -9,7 +9,7 @@ from flask_sqlalchemy import get_debug_queries
 from apidoc.apis.main import main_bp
 from apidoc.apis.v1 import api_v1
 from apidoc.decorators import logger_error
-from apidoc.extensions import db, migrate, login_manager
+from apidoc.extensions import db, migrate
 from apidoc.models import Role, User, Project, System, URL, APIDoc, Protocol, Method, ProjectCollect, SystemCollect, \
     URLCollect
 from apidoc.response import response
@@ -73,7 +73,6 @@ def register_logging(app):
 
 def register_extensions(app):
     db.init_app(app)
-    login_manager.init_app(app)
     migrate.init_app(app, db)
 
 

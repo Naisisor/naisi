@@ -1,50 +1,70 @@
-from flask import Blueprint, g, jsonify
-from flask_httpauth import HTTPBasicAuth
+# -*- coding: utf-8 -*-
+"""
+    :author: Grey Li (李辉)
+    :url: http://greyli.com
+    :copyright: © 2018 Grey Li <withlihui@gmail.com>
+    :license: MIT, see LICENSE for more details.
+"""
+from functools import wraps
 
+from flask import g, current_app, request
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
+
+from apidoc.apis.v1.errors import api_abort, invalid_token, token_missing
 from apidoc.models import User
-from apidoc.response import response
-
-api = Blueprint('auth', __name__)
-auth = HTTPBasicAuth()
 
 
-@auth.verify_password
-def verify_password(email_or_token, password):
-    if email_or_token == '':
+def generate_token(user):
+    expiration = 3600
+    s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
+    token = s.dumps({'id': user.id}).decode('ascii')
+    return token, expiration
+
+
+def validate_token(token):
+    s = Serializer(current_app.config['SECRET_KEY'])
+    try:
+        data = s.loads(token)
+    except (BadSignature, SignatureExpired):
         return False
-    if password == '':
-        g.current_user = User.verify_auth_token(email_or_token)
-        g.token_used = True
-        return g.current_user is not None
-    user = User.query.filter_by(email=email_or_token).first()
-    if not user:
+    user = User.query.get(data['id'])
+    if user is None:
         return False
     g.current_user = user
-    g.token_used = False
-    return user.verify_password(password)
+    return True
 
 
-@auth.error_handler
-def auth_error():
-    return response(code=1, message='Invalid credentials')
-
-
-@api.before_request
-@auth.login_required
-def before_request():
-    if not g.current_user.is_anonymous and \
-            not g.current_user.confirmed:
-        return response(code=1, message='Unconfirmed account')
-
-
-@api.route('/tokens/', methods=['POST'])
 def get_token():
-    if g.current_user.is_anonymous or g.token_used:
-        return response(code=1, message='Invalid credentials')
-    return jsonify({'token': g.current_user.generate_auth_token(
-        expiration=3600), 'expiration': 3600})
+    # Flask/Werkzeug do not recognize any authentication types
+    # other than Basic or Digest, so here we parse the header by hand.
+    if 'Authorization' in request.headers:
+        try:
+            token_type, token = request.headers['Authorization'].split(None, 1)
+        except ValueError:
+            # The Authorization header is either empty or has no token
+            token_type = token = None
+    else:
+        token_type = token = None
+
+    return token_type, token
 
 
-@api.route('/register')
-def register():
-    return response()
+def auth_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token_type, token = get_token()
+
+        # Flask normally handles OPTIONS requests on its own, but in the
+        # case it is configured to forward those to the application, we
+        # need to ignore authentication headers and let the request through
+        # to avoid unwanted interactions with CORS.
+        if request.method != 'OPTIONS':
+            if token_type is None or token_type.lower() != 'bearer':
+                return api_abort(400, 'The token type must be bearer.')
+            if token is None:
+                return token_missing()
+            if not validate_token(token):
+                return invalid_token()
+        return f(*args, **kwargs)
+
+    return decorated

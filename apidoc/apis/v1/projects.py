@@ -8,6 +8,7 @@ from apidoc.response import response
 
 
 class ProjectsAPI(MethodView):
+
     def get(self):
         """ 获取所有项目 """
         projects = Project.query.order_by(Project.c_time.desc()).all()
@@ -72,7 +73,7 @@ class ProjectAPI(MethodView):
 
     def patch(self, project_id):
         """ 修改项目某一项参数 """
-        project = Project.query.get_or_404(project_id)
+        Project.query.get_or_404(project_id)
         return response()
 
 
