@@ -12,11 +12,7 @@ flask-migrate = "*"
 python-dotenv = "*"
 flask-httpauth = "*"
 flask-cors = "*"
-flask-login = "*"
+gunicorn = "*"
 
 [dev-packages]
-pylint = "*"
-autopep8 = "*"
-
-[requires]
-python_version = "3"
+"flake8" = "*"

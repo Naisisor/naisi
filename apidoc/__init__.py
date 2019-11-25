@@ -6,6 +6,7 @@ from pathlib import Path
 from flask import Flask, request
 from flask_sqlalchemy import get_debug_queries
 
+from apidoc.apis.main import main_bp
 from apidoc.apis.v1 import api_v1
 from apidoc.decorators import logger_error
 from apidoc.extensions import db, migrate, login_manager
@@ -77,6 +78,7 @@ def register_extensions(app):
 
 
 def register_blueprint(app):
+    app.register_blueprint(main_bp, url_profix='/')
     app.register_blueprint(api_v1, url_prefix='/api/v1')
 
 

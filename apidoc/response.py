@@ -28,4 +28,4 @@ def response(data=None, code=0, message='Success'):
         'data': data
     }
     app.logger.info(f'{response_body}')
-    return make_response((jsonify(response_body), 200, headers))
+    return make_response((jsonify(response_body), 200))
