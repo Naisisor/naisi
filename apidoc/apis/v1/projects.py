@@ -1,8 +1,8 @@
 from flask import request
 from flask.views import MethodView
 
-from apidoc.extensions import db
 from apidoc.apis.v1 import api_v1
+from apidoc.extensions import db
 from apidoc.models import Project, User
 from apidoc.response import response
 
@@ -36,6 +36,7 @@ class ProjectsAPI(MethodView):
 
 
 class ProjectAPI(MethodView):
+
     def get(self, project_id):
         """ 获取项目信息 """
         project = Project.query.get_or_404(project_id)

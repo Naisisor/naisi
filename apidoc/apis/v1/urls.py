@@ -1,14 +1,15 @@
 from flask import request
 from flask.views import MethodView
 
-from apidoc.extensions import db
 from apidoc.apis.v1 import api_v1
+from apidoc.extensions import db
 from apidoc.libs.common import is_contain_zh
 from apidoc.models import URL, System, User, Protocol
 from apidoc.response import response
 
 
 class URLsAPI(MethodView):
+
     def get(self, sys_id):
         """ 获取项目下的项目集 """
         system = System.query.get_or_404(sys_id)
@@ -44,6 +45,7 @@ class URLsAPI(MethodView):
 
 
 class URLAPI(MethodView):
+
     def get(self, url_id):
         """ 获取 URL 详情 """
         url = URL.query.get_or_404(url_id)

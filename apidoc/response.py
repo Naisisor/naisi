@@ -1,4 +1,4 @@
-from flask import jsonify, make_response, current_app as app
+from flask import jsonify, current_app as app
 
 
 def response(data=None, code=0, message='Success', headers=None):

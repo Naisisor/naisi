@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 from flask import url_for
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from apidoc.extensions import db
 
@@ -88,8 +88,8 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True)
-    name = db.Column(db.String(30), unique=True)
-    username = db.Column(db.String(64), unique=True, index=True)
+    name = db.Column(db.String(20))
+    username = db.Column(db.String(20), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
 
@@ -119,11 +119,14 @@ class User(db.Model):
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
+    def validate_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
     def to_json(self):
         json_user = {
             'id': self.id,
             'email': self.email,
-            'name': self.name,
+            'name': self.name or self.username,
             'username': self.username,
             'avatar': '',
             'projects_url': url_for(
@@ -162,15 +165,16 @@ class Project(db.Model):
         back_populates='project',
         cascade='all, delete-orphan')
 
-    def to_json(self):
+    def to_json(self, author=True):
         json_project = {
             'id': self.id,
             'name': self.name or '',
             'desc': self.desc or self.name,
             'domains': json.loads(self.domains or '[]'),
-            'create_time': str(self.c_time),
-            'supporter': self.supporter.to_json()
+            'create_time': str(self.c_time)
         }
+        if author is True:
+            json_project['supporter'] = self.supporter.to_json()
         return json_project
 
 
@@ -178,7 +182,7 @@ class System(db.Model):
     """ 系统列表 """
     __tablename__ = 'systems'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.String(64))
     desc = db.Column(db.String(128))
     domains = db.Column(db.Text, comment="列表 json 串，包含 dev、test、stage、online 环境")
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
@@ -204,6 +208,7 @@ class System(db.Model):
             'desc': self.desc or self.name,
             'domains': json.loads(self.domains or '[]'),
             'create_time': str(self.c_time),
+            'project': self.project.to_json(author=False),
             'supporter': self.supporter.to_json()
         }
         return json_system

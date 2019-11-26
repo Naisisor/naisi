@@ -1,13 +1,14 @@
 from flask import request, current_app
 from flask.views import MethodView
 
-from apidoc.extensions import db
 from apidoc.apis.v1 import api_v1
+from apidoc.extensions import db
 from apidoc.models import System, Project, User
 from apidoc.response import response
 
 
 class SystemsAPI(MethodView):
+
     def get(self, project_id):
         """ 获取项目下的项目集 """
         project = Project.query.get_or_404(project_id)
@@ -48,6 +49,7 @@ class SystemsAPI(MethodView):
 
 
 class SystemAPI(MethodView):
+
     def get(self, sys_id):
         """ 获取系统信息 """
         system = System.query.get_or_404(sys_id)

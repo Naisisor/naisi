@@ -1,40 +1,10 @@
-from flask import current_app, request, jsonify
+from flask import current_app, request, g
 from flask.views import MethodView
 
 from apidoc.apis.v1 import api_v1
-from apidoc.apis.v1.auth import generate_token
-from apidoc.apis.v1.errors import api_abort
+from apidoc.apis.v1.auth import auth_required
 from apidoc.models import User, ProjectCollect, URLCollect, SystemCollect
 from apidoc.response import response
-
-
-class AuthTokenAPI(MethodView):
-
-    def post(self):
-        grant_type = request.form.get('grant_type')
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        if grant_type is None or grant_type.lower() != 'password':
-            return api_abort(code=400, message='The grant type must be password.')
-
-        user = User.query.filter_by(username=username).first()
-        if user is None or not user.validate_password(password):
-            return api_abort(code=400, message='Either the username or password was invalid.')
-
-        token, expiration = generate_token(user)
-        headers = {
-            'Cache-Control': 'no-store',
-            'Pragma': 'no-cache'
-        }
-
-        data = {
-            'access_token': token,
-            'token_type': 'Bearer',
-            'expires_in': expiration
-        }
-
-        return response(data=data, headers=headers)
 
 
 class UsersAPI(MethodView):
@@ -59,12 +29,16 @@ class UsersAPI(MethodView):
 
 
 class UserAPI(MethodView):
+    decorators = [auth_required]
 
     def get(self, user_id):
         """ 获取用户信息 """
-        user = User.query.get_or_404(user_id)
+        if user_id == g.current_user.id:
+            user = g.current_user
+        else:
+            user = User.query.get(user_id)
         if not user:
-            return response(code=1, message='此用户不存在')
+            return response(code=1, message='用户不存在')
         return response(data={'user': user.to_json()})
 
     def post(self):
@@ -194,7 +168,6 @@ class UserCollectionURLs(MethodView):
         return response(data=data)
 
 
-api_v1.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), methods=['POST'])
 api_v1.add_url_rule('/users', view_func=UsersAPI.as_view('users'), methods=['GET', 'POST'])
 api_v1.add_url_rule('/users/<int:user_id>', view_func=UserAPI.as_view('user'), methods=['GET'])
 api_v1.add_url_rule('/users/<int:user_id>/projects',

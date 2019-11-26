@@ -1,14 +1,15 @@
 from flask import request
 from flask.views import MethodView
 
-from apidoc.extensions import db
 from apidoc.apis.v1 import api_v1
+from apidoc.extensions import db
 from apidoc.libs.common import is_contain_zh
 from apidoc.models import Method, Protocol
 from apidoc.response import response
 
 
 class MethodsAPI(MethodView):
+
     def get(self, protocol_id):
         protocol = Protocol.query.get_or_404(protocol_id)
         return response(data={'methods': [m.to_json() for m in protocol.methods]})
@@ -31,6 +32,7 @@ class MethodsAPI(MethodView):
 
 
 class MethodAPI(MethodView):
+    
     def get(self, m_id):
         """ 获取方法信息 """
         method = Method.query.get_or_404(id)
