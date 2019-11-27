@@ -1,10 +1,9 @@
-from flask import request
 from flask.views import MethodView
 from webargs.flaskparser import use_kwargs
 
 from apidoc.apis.v1 import api_v1
 from apidoc.extensions import db
-from apidoc.libs.args_schema import PaginateSchema
+from apidoc.libs.args_schema import PaginateSchema, PASysSchema
 from apidoc.models import System, Project, User
 from apidoc.response import response
 
@@ -24,21 +23,19 @@ class SystemsAPI(MethodView):
         }
         return response(data=data)
 
-    def post(self, project_id):
+    @use_kwargs(PASysSchema)
+    def post(self, project_id, name, desc, domains, supporter_id):
         """ 新建系统 """
         project = Project.query.get_or_404(project_id)
-        params = request.json
-        name = params.get('name', '')
-        supporter_id = params.get('supporter_id', 0)
-        if not (name and supporter_id and project_id):
-            return response(code=1, message='参数不能为空')
         supporter = User.query.get_or_404(supporter_id)
+
         existed_system = project.systems.filter(System.name == name).first()
         if existed_system:
             return response(code=1, message=f'系统 {name} 已存在，请勿重复添加')
+
         system = System(name=name,
-                        desc=params.get('desc', ''),
-                        domains=params.get('domains', '[]'),
+                        desc=desc,
+                        domains=domains,
                         project_id=project.id,
                         supporter_id=supporter.id)
         db.session.add(system)
@@ -60,23 +57,20 @@ class SystemAPI(MethodView):
         db.session.commit()
         return response()
 
-    def put(self, sys_id):
+    @use_kwargs(PASysSchema)
+    def put(self, sys_id, name, desc, domains, supporter_id, project_id):
         """ 编辑系统 """
         system = System.query.get_or_404(sys_id)
-        params = request.json
-        name = params.get('name', '')
-        supporter_id = params.get('supporter_id', 0)
-        project_id = params.get('project_id', 0)
-        if not (name and supporter_id and project_id):
-            return response(code=1, message='参数不能为空')
         supporter = User.query.get_or_404(supporter_id)
         project = Project.query.get_or_404(project_id)
+
         existed_system = project.systems.filter(System.name == name).first()
         if existed_system and existed_system.id != system.id:
             return response(code=1, message=f'系统 {name} 已存在，请勿重复添加')
+
         system.name = name
-        system.desc = params.get('desc', ''),
-        system.domains = params.get('domains', '[]')
+        system.desc = desc,
+        system.domains = domains
         system.project_id = project.id
         system.supporter_id = supporter.id
         db.session.add(system)

@@ -1,8 +1,9 @@
-from flask import request
 from flask.views import MethodView
+from webargs.flaskparser import use_kwargs
 
 from apidoc.apis.v1 import api_v1
 from apidoc.extensions import db
+from apidoc.libs.args_schema import PASysSchema
 from apidoc.models import Project, User
 from apidoc.response import response
 
@@ -14,21 +15,17 @@ class ProjectsAPI(MethodView):
         projects = Project.query.order_by(Project.c_time.desc()).all()
         return response(data={'projects': [project.to_json() for project in projects]})
 
-    def post(self):
+    @use_kwargs(PASysSchema)
+    def post(self, name, desc, domains, supporter_id):
         """ 新增项目 """
-        params = request.json
-        name = params.get('name', None)
-        desc = params.get('desc', '')
-        supporter_id = params.get('supporter_id', 0)
-        if not (name and supporter_id):
-            return response(code=1, message='参数错误')
         exited_project = Project.query.filter_by(name=name).first()
         if exited_project:
             return response(code=1, message='项目已存在，请勿重复添加')
+
         supporter = User.query.get_or_404(supporter_id)
         project = Project(name=name,
                           desc=desc,
-                          domains=params.get('domains', '[]'),
+                          domains=domains,
                           supporter_id=supporter.id)
         db.session.add(project)
         db.session.commit()
@@ -52,21 +49,19 @@ class ProjectAPI(MethodView):
         db.session.commit()
         return response(message='删除成功')
 
-    def put(self, project_id):
+    @use_kwargs(PASysSchema)
+    def put(self, project_id, name, desc, domains, supporter_id):
         """ 编辑项目 """
         project = Project.query.get_or_404(project_id)
-        params = request.json
-        name = params.get('name', '')
-        supporter_id = params.get('supporter_id', 0)
-        if not (name and supporter_id):
-            return response(code=1, message='参数错误')
+
         existed_project = Project.query.filter_by(name=name).first()
         if existed_project and existed_project.id != project.id:
             return response(code=1, message='项目已存在，请勿重复添加')
+
         supporter = User.query.get_or_404(supporter_id)
         project.name = name
-        project.desc = params.get('desc', '')
-        project.domains = params.get('domains', '[]')
+        project.desc = desc
+        project.domains = domains
         project.supporter_id = supporter.id
         db.session.add(project)
         db.session.commit()

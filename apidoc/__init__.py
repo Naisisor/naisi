@@ -81,7 +81,7 @@ def register_blueprint(app):
     app.register_blueprint(api_v1, url_prefix='/api/v1')
 
 
-def register_errorhandlers(app):
+def register_errorhandlers(app):  # noqa
     @app.errorhandler(400)
     @logger_error
     def bad_request(e):
@@ -96,7 +96,12 @@ def register_errorhandlers(app):
     @logger_error
     def handle_validation_error(e):
         exc = e.exc
-        return response(code=e.code, message=exc.messages)
+
+        message = ''
+        for k in exc.messages:
+            message += f'参数 {k} 的值 {" ".join(exc.messages[k])} '
+
+        return response(code=e.code, message=message)
 
     @app.errorhandler(500)
     @logger_error
