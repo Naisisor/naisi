@@ -98,8 +98,8 @@ def register_errorhandlers(app):  # noqa
         exc = e.exc
 
         message = ''
-        for k in exc.messages:
-            message += f'参数 {k} 的值 {" ".join(exc.messages[k])} '
+        for k, v in exc.messages.items():
+            message += f'参数 {k} {" ".join(v)} '
 
         return response(code=e.code, message=message)
 
