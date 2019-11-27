@@ -1,9 +1,10 @@
-from flask import request
 from flask.views import MethodView
+from webargs import fields
+from webargs.flaskparser import use_kwargs
 
 from apidoc.apis.v1 import api_v1
 from apidoc.extensions import db
-from apidoc.libs.common import is_contain_zh
+from apidoc.libs.args_schema import NameSchema
 from apidoc.models import Method, Protocol
 from apidoc.response import response
 
@@ -14,12 +15,9 @@ class MethodsAPI(MethodView):
         protocol = Protocol.query.get_or_404(protocol_id)
         return response(data={'methods': [m.to_json() for m in protocol.methods]})
 
-    def post(self, protocol_id):
+    @use_kwargs(NameSchema)
+    def post(self, protocol_id, name):
         """ 新建方法 """
-        params = request.json
-        name = params.get('name', '')
-        if not (name and protocol_id) or is_contain_zh(name):
-            return response(code=1, message='参数错误，且方法名不能包含中文')
         protocol = Protocol.query.get_or_404(protocol_id)
         cap_name = name.upper()
         existed_method = protocol.methods.filter(Method.name == cap_name).first()
@@ -32,10 +30,10 @@ class MethodsAPI(MethodView):
 
 
 class MethodAPI(MethodView):
-    
+
     def get(self, m_id):
         """ 获取方法信息 """
-        method = Method.query.get_or_404(id)
+        method = Method.query.get_or_404(m_id)
         return response(data={'method': method.to_json()})
 
     def delete(self, m_id):
@@ -48,14 +46,11 @@ class MethodAPI(MethodView):
         db.session.commit()
         return response()
 
-    def put(self, m_id):
+    @use_kwargs(NameSchema)
+    @use_kwargs({'protocol_id': fields.Int(required=True, default=0)})
+    def put(self, m_id, name, protocol_id):
         """ 编辑方法 """
         method = Method.query.get_or_404(m_id)
-        params = request.json
-        name = params.get('name', '')
-        protocol_id = params.get('protocol_id', 0)
-        if not (name and protocol_id) or is_contain_zh(name):
-            return response(code=1, message='参数错误，且方法名不能包含中文')
         protocol = Protocol.query.get_or_404(protocol_id)
         cap_name = name.upper()
         existed_method = protocol.methods.filter(Method.name == cap_name).first()
