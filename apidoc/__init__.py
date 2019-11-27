@@ -92,6 +92,12 @@ def register_errorhandlers(app):
     def page_not_fount(e):
         return response(code=e.code, message=e.description)
 
+    @app.errorhandler(422)
+    @logger_error
+    def handle_validation_error(e):
+        exc = e.exc
+        return response(code=e.code, message=exc.messages)
+
     @app.errorhandler(500)
     @logger_error
     def internal_server_error(e):

@@ -1,22 +1,19 @@
-from flask import current_app, request, g
+from flask import g
 from flask.views import MethodView
+from webargs.flaskparser import use_kwargs
 
 from apidoc.apis.v1 import api_v1
 from apidoc.apis.v1.auth import auth_required
+from apidoc.libs.args_schema import PaginateSchema
 from apidoc.models import User, ProjectCollect, URLCollect, SystemCollect
 from apidoc.response import response
 
 
 class UsersAPI(MethodView):
 
-    def get(self):
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get(
-            'per_page',
-            current_app.config['API_DOC_PER_PAGE'],
-            type=int)
-        paginate = User.query.paginate(
-            page, per_page, error_out=False)
+    @use_kwargs(PaginateSchema)
+    def get(self, page, per_page):
+        paginate = User.query.paginate(page, per_page, error_out=False)
         data = {
             'projects': [p.to_json() for p in paginate.items],
             'count': paginate.total,
@@ -47,14 +44,10 @@ class UserAPI(MethodView):
 
 class UserSupportProjects(MethodView):
 
-    def get(self, user_id):
+    @use_kwargs(PaginateSchema)
+    def get(self, user_id, page, per_page):
         """ 获取用户所创建的项目 """
         user = User.query.get_or_404(user_id)
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get(
-            'per_page',
-            current_app.config['API_DOC_PER_PAGE'],
-            type=int)
         paginate = user.projects.paginate(
             page, per_page, error_out=False)
         data = {
@@ -67,14 +60,10 @@ class UserSupportProjects(MethodView):
 
 class UserSupportSystems(MethodView):
 
-    def get(self, user_id):
+    @use_kwargs(PaginateSchema)
+    def get(self, user_id, page, per_page):
         """ 获取用户所创建的系统 """
         user = User.query.get_or_404(user_id)
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get(
-            'per_page',
-            current_app.config['API_DOC_PER_PAGE'],
-            type=int)
         paginate = user.systems.paginate(
             page, per_page, error_out=False)
         data = {
@@ -87,14 +76,10 @@ class UserSupportSystems(MethodView):
 
 class UserSupportURLs(MethodView):
 
-    def get(self, user_id):
+    @use_kwargs(PaginateSchema)
+    def get(self, user_id, page, per_page):
         """ 获取用户所创建的 uri """
         user = User.query.get_or_404(user_id)
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get(
-            'per_page',
-            current_app.config['API_DOC_PER_PAGE'],
-            type=int)
         paginate = user.urls.paginate(
             page, per_page, error_out=False)
         data = {
@@ -107,14 +92,10 @@ class UserSupportURLs(MethodView):
 
 class UserCollectionProjects(MethodView):
 
-    def get(self, user_id):
+    @use_kwargs(PaginateSchema)
+    def get(self, user_id, page, per_page):
         """ 获取用户收藏的项目 """
         user = User.query.get_or_404(user_id)
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get(
-            'per_page',
-            current_app.config['API_DOC_PER_PAGE'],
-            type=int)
         paginate = ProjectCollect.query.with_parent(user).order_by(
             ProjectCollect.timestamp.desc()).paginate(
             page, per_page, error_out=False)
@@ -128,14 +109,10 @@ class UserCollectionProjects(MethodView):
 
 class UserCollectionSystems(MethodView):
 
-    def get(self, user_id):
+    @use_kwargs(PaginateSchema)
+    def get(self, user_id, page, per_page):
         """ 获取用户收藏的系统 """
         user = User.query.get_or_404(user_id)
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get(
-            'per_page',
-            current_app.config['API_DOC_PER_PAGE'],
-            type=int)
         paginate = SystemCollect.query.with_parent(user).order_by(
             SystemCollect.timestamp.desc()).paginate(
             page, per_page, error_out=False)
@@ -149,14 +126,10 @@ class UserCollectionSystems(MethodView):
 
 class UserCollectionURLs(MethodView):
 
-    def get(self, user_id):
+    @use_kwargs(PaginateSchema)
+    def get(self, user_id, page, per_page):
         """ 获取用户收藏的 URL """
         user = User.query.get_or_404(user_id)
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get(
-            'per_page',
-            current_app.config['API_DOC_PER_PAGE'],
-            type=int)
         paginate = URLCollect.query.with_parent(user).order_by(
             URLCollect.timestamp.desc()).paginate(
             page, per_page, error_out=False)

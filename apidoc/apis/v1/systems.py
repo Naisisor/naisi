@@ -1,22 +1,20 @@
-from flask import request, current_app
+from flask import request
 from flask.views import MethodView
+from webargs.flaskparser import use_kwargs
 
 from apidoc.apis.v1 import api_v1
 from apidoc.extensions import db
+from apidoc.libs.args_schema import PaginateSchema
 from apidoc.models import System, Project, User
 from apidoc.response import response
 
 
 class SystemsAPI(MethodView):
 
-    def get(self, project_id):
+    @use_kwargs(PaginateSchema)
+    def get(self, project_id, page, per_page):
         """ 获取项目下的项目集 """
         project = Project.query.get_or_404(project_id)
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get(
-            'per_page',
-            current_app.config['API_DOC_PER_PAGE'],
-            type=int)
         paginate = project.systems.order_by(System.id.desc()).paginate(
             page, per_page, error_out=False)
         data = {

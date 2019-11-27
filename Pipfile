@@ -13,6 +13,7 @@ python-dotenv = "*"
 flask-httpauth = "*"
 flask-cors = "*"
 gunicorn = "*"
+webargs = "*"
 
 [dev-packages]
 "flake8" = "*"

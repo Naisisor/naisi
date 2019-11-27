@@ -1,5 +1,7 @@
-from flask import Blueprint, current_app, request
+from flask import Blueprint, current_app
 from flask.views import MethodView
+from webargs import fields, validate
+from webargs.flaskparser import use_kwargs
 
 from apidoc.apis.v1.auth import generate_token
 from apidoc.apis.v1.errors import api_abort
@@ -16,21 +18,23 @@ class FaviconAPI(MethodView):
         return current_app.send_static_file('favicon.ico')
 
 
+account_args = {
+    'username': fields.Str(required=True, validate=validate.Length(min=6, max=18)),
+    'password': fields.Str(validate=validate.Length(min=6, max=18))
+}
+
+
 class RegisterAPI(MethodView):
 
-    def post(self):
-        email = request.form['email'].lower()
-        username = request.form['username']
-
+    @use_kwargs({'email': fields.Str(required=True, validate=validate.Email(error='邮件格式错误'))}, locations=('form',))
+    @use_kwargs(account_args, locations=('form',))
+    def post(self, email, username, password):
         user = User.query.filter_by(email=email).first()
         if user is not None:
             return response(code=1, message=f'邮箱 {user.email} 已存在')
         user = User.query.filter_by(username=username).first()
         if user is not None:
             return response(code=1, message=f'用户名 {user.username} 已存在')
-
-        username = request.form['username']
-        password = request.form['password']
 
         user = User(username=username, email=email)
         user.set_password(password)
@@ -41,11 +45,12 @@ class RegisterAPI(MethodView):
 
 class AuthTokenAPI(MethodView):
 
-    def post(self):
-        grant_type = request.form.get('grant_type')
-        username = request.form.get('username')
-        password = request.form.get('password')
-
+    @use_kwargs({'grant_type': fields.Str(required=True,
+                                          validate=validate.Equal('password',
+                                                                  error='The grant type must be password.'))},
+                locations=('form',))
+    @use_kwargs(account_args, locations=('form',))
+    def post(self, grant_type, username, password):
         if grant_type is None or grant_type.lower() != 'password':
             return api_abort(code=400, message='The grant type must be password.')
 
