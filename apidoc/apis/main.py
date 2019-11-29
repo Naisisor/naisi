@@ -45,13 +45,11 @@ class RegisterAPI(MethodView):
 
 class AuthTokenAPI(MethodView):
 
-    @use_kwargs({'grant_type': fields.Str(required=True,
-                                          validate=validate.Equal('password',
-                                                                  error='The grant type must be password.'))},
+    @use_kwargs({'grant_type': fields.Str(required=True, validate=validate.Length(min=1, error='不能为空'))},
                 locations=('form',))
     @use_kwargs(account_args, locations=('form',))
     def post(self, grant_type, username, password):
-        if grant_type is None or grant_type.lower() != 'password':
+        if grant_type.lower() != 'password':
             return api_abort(code=400, message='The grant type must be password.')
 
         user = User.query.filter_by(username=username).first()
@@ -74,5 +72,6 @@ class AuthTokenAPI(MethodView):
 
 
 main_bp.add_url_rule('/favicon.ico', view_func=FaviconAPI.as_view('favicon'), methods=['GET'])
-main_bp.add_url_rule('/register', view_func=RegisterAPI.as_view('register'), methods=['POST'])
+main_bp.add_url_rule('/auth/register', view_func=RegisterAPI.as_view('register'), methods=['POST'])
+main_bp.add_url_rule('/auth/login', view_func=AuthTokenAPI.as_view('login'), methods=['POST'])
 main_bp.add_url_rule('/oauth/token', view_func=AuthTokenAPI.as_view('token'), methods=['POST'])

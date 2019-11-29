@@ -19,5 +19,5 @@ class PASysSchema(Schema):
     desc = fields.Str(missing='', validate=validate.Length(max=255, error='名称不能为空'), location='json')
     domains = fields.Str(missing='[]', location='json')
     # TODO 以下参数后续逐步删除
-    supporter_id = fields.Int(missing=0)  # 维护者 id 创建项目或者系统时，用 g.current_user.id 支持 method patch 修改用户及项目 id
-    project_id = fields.Int(missing=0)
+    supporter_id = fields.Int(default=0)  # 维护者 id 创建项目或者系统时，用 g.current_user.id 支持 method patch 修改用户及项目 id
+    project_id = fields.Int(default=0)
