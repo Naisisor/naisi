@@ -6,6 +6,7 @@ name = "pypi"
 
 [packages]
 flask = "*"
+flask-debugtoolbar = "*"
 flask-sqlalchemy = "*"
 pymysql = "*"
 flask-migrate = "*"
@@ -17,6 +18,7 @@ webargs = "*"
 
 [dev-packages]
 "flake8" = "*"
+faker = "*"
 
 [requires]
 python_version = "3.7"

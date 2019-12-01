@@ -149,7 +149,7 @@ class Project(db.Model):
     __tablename__ = 'projects'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    desc = db.Column(db.String(128), default='')
+    desc = db.Column(db.Text, default='')
     domains = db.Column(db.Text)
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
     supporter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -183,7 +183,7 @@ class System(db.Model):
     __tablename__ = 'systems'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
-    desc = db.Column(db.String(128))
+    desc = db.Column(db.Text)
     domains = db.Column(db.Text, comment="列表 json 串，包含 dev、test、stage、online 环境")
     c_time = db.Column(db.DateTime, default=datetime.utcnow)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))

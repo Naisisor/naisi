@@ -3,13 +3,14 @@ import os
 from logging.handlers import RotatingFileHandler, SMTPHandler
 from pathlib import Path
 
+import click
 from flask import Flask, request
 from flask_sqlalchemy import get_debug_queries
 
 from apidoc.apis.main import main_bp
 from apidoc.apis.v1 import api_v1
 from apidoc.decorators import logger_error
-from apidoc.extensions import db, migrate
+from apidoc.extensions import db, migrate, toolbar
 from apidoc.models import Role, User, Project, System, URL, APIDoc, Protocol, Method, ProjectCollect, SystemCollect, \
     URLCollect
 from apidoc.response import response
@@ -27,6 +28,7 @@ def create_app(config_name=None):
     register_logging(app)
     register_extensions(app)
     register_blueprint(app)
+    register_commands(app)
     register_errorhandlers(app)
     register_shell_context(app)
     register_request_handlers(app)
@@ -74,6 +76,7 @@ def register_logging(app):
 def register_extensions(app):
     db.init_app(app)
     migrate.init_app(app, db)
+    toolbar.init_app(app)
 
 
 def register_blueprint(app):
@@ -140,13 +143,44 @@ def register_shell_context(app):
         )
 
 
+def register_commands(app):
+    @app.cli.command()
+    @click.option('--drop', is_flag=True, help='Create after drop.')
+    def initdb(drop):
+        """Initialize the database."""
+        if drop:
+            click.confirm('This operation will delete the database, do you want to continue?', abort=True)
+            db.drop_all()
+            click.echo('Drop tables.')
+        db.create_all()
+        click.echo('Initialized database.')
+
+    @app.cli.command()
+    @click.option('--project', default=50, help='Quantity of projects, default is 10.')
+    @click.option('--system', default=50, help='Quantity of systems, default is 50.')
+    def forge(project, system):
+        """Generate fake data."""
+        from apidoc.fakes import fake_admin, fake_projects, fake_systems
+
+        db.drop_all()
+        db.create_all()
+
+        click.echo('Generating the administrator...')
+        fake_admin()
+
+        click.echo('Generating %d projects...' % project)
+        fake_projects(project)
+
+        click.echo('Generating %d systems...' % system)
+        fake_systems(system)
+
+
 def register_request_handlers(app):
     @app.after_request
     def query_profiler(response):
         for q in get_debug_queries():
-            if q.duration >= app.config['APIDOC_SLOW_QUERY_THRESHOLD']:
-                app.logger.warning(
-                    'Slow query: Duration: %fs\n Context: %s\nQuery: %s\n '
-                    % (q.duration, q.context, q.statement)
-                )
+            app.logger.warning(
+                'Slow query: Duration: %fs\n Context: %s\nQuery: %s\n '
+                % (q.duration, q.context, q.statement)
+            )
         return response

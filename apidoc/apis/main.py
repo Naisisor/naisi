@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app
+from flask import Blueprint, current_app, render_template
 from flask.views import MethodView
 from webargs import fields, validate
 from webargs.flaskparser import use_kwargs
@@ -12,6 +12,11 @@ from apidoc.response import response
 main_bp = Blueprint('main', __name__)
 
 
+@main_bp.route('/')
+def index():
+    return render_template('index.html')
+
+
 class FaviconAPI(MethodView):
 
     def get(self):
@@ -19,8 +24,8 @@ class FaviconAPI(MethodView):
 
 
 account_args = {
-    'username': fields.Str(required=True, validate=validate.Length(min=6, max=18)),
-    'password': fields.Str(validate=validate.Length(min=6, max=18))
+    'username': fields.Str(required=True, validate=validate.Length(min=5, max=18)),
+    'password': fields.Str(validate=validate.Length(min=5, max=18))
 }
 
 
